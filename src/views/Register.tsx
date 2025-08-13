@@ -1,40 +1,78 @@
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Text, TextInput, Button } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { useToast } from '../context/ToastContext';
 import { globalStyles } from '../styles';
-import { useState } from 'react';
-import Toast from '../components/Toast';
+import { NavigationProp } from '../types';
+
+// Apollo
+import { ApolloError, gql, useMutation } from '@apollo/client';
+
+const NEW_ACCOUNT = gql`
+  mutation createUser($input: UserInput) {
+    createUser(input: $input)
+  }
+`;
 
 export default function Register() {
   // Form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [visible, setVisible] = useState(false);
+
+  // Toast
+  const { showToast } = useToast();
+
+  // Redirect
+  const navigation = useNavigation<NavigationProp>();
+
+  // Apollo's mutation
+  const [createUser] = useMutation(NEW_ACCOUNT);
 
   // After fill out form
-  const hanldeSubmit = () => {
+  const handleSubmit = async () => {
     // Validate
     if (!name || !email || !password) {
-      setMessage('All fields are required');
-      setVisible(true);
+      showToast('All fields are required');
       return;
     }
 
     // Password length
-    if (password.length) {
-      setMessage('Password must be at least 6 characters');
-      setVisible(true);
+    if (password.length < 6) {
+      showToast('Password must be at least 6 characters');
       return;
     }
 
     // Save user
+    try {
+      const { data } = await createUser({
+        variables: {
+          input: {
+            name,
+            email,
+            password,
+          },
+        },
+      });
+
+      showToast(data.createUser);
+      navigation.navigate('Login');
+    } catch (error) {
+      if (error instanceof ApolloError && error.graphQLErrors.length > 0) {
+        showToast(error.graphQLErrors[0].message);
+      } else if (error instanceof Error) {
+        showToast(error.message);
+      } else {
+        showToast('Something went wrong');
+      }
+    }
   };
 
   return (
     <View style={[globalStyles.container, { backgroundColor: '#E84347' }]}>
       <View style={globalStyles.content}>
-        <Text style={globalStyles.title}>UpTask</Text>
+        <Text style={globalStyles.title}>Create account</Text>
 
         <View>
           <TextInput
@@ -60,12 +98,10 @@ export default function Register() {
           />
         </View>
 
-        <Button style={globalStyles.btn} onPress={() => hanldeSubmit()}>
+        <Button style={globalStyles.btn} onPress={() => handleSubmit()}>
           <Text style={globalStyles.btnText}>Register</Text>
         </Button>
       </View>
-
-      <Toast visible={visible} setVisible={setVisible} message={message} />
     </View>
   );
 }
