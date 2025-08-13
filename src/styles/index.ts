@@ -17,6 +17,13 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+  subtitle: {
+    fontSize: 26,
+    color: '#FFF',
+    marginBottom: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   input: {
     marginBottom: 20,
     borderRadius: 10,
