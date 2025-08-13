@@ -5,7 +5,7 @@ import { globalStyles } from '../styles';
 import { GetProjectsData, NavigationProp } from '../types';
 
 // Apollo
-import { ApolloError, gql, useQuery } from '@apollo/client';
+import { gql, useQuery } from '@apollo/client';
 import Spinner from '../components/Spinner';
 
 const GET_PROJECTS = gql`
@@ -22,7 +22,7 @@ export default function Projects() {
   const navigation = useNavigation<NavigationProp>();
 
   // Apollo's query
-  const { data, loading, error } = useQuery<GetProjectsData>(GET_PROJECTS);
+  const { data, loading } = useQuery<GetProjectsData>(GET_PROJECTS);
 
   if (loading) return <Spinner />;
 
@@ -39,9 +39,7 @@ export default function Projects() {
           <Text style={globalStyles.btnText}>New project</Text>
         </Button>
 
-        <Text style={[globalStyles.subtitle, { marginTop: 20 }]}>
-          Select a project
-        </Text>
+        <Text style={globalStyles.subtitle}>Select a project</Text>
 
         <View style={styles.content}>
           {data.getProjects.map(project => (

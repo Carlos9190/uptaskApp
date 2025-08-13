@@ -12,6 +12,7 @@ export type RootStackParamList = {
 // Navigation
 export type NavigationProp = StackNavigationProp<RootStackParamList>;
 
+// Projects
 export type Project = {
   id: string;
   name: string;
@@ -19,4 +20,16 @@ export type Project = {
 
 export type GetProjectsData = {
   getProjects: Project[];
+};
+
+// Tasks
+export type Task = {
+  id: string;
+  name: string;
+  project: Project;
+  status: boolean;
+};
+
+export type GetTasksData = {
+  getTasks: Task[];
 };
