@@ -79,7 +79,8 @@ export default function Login() {
             placeholder="Email"
             style={globalStyles.input}
             activeUnderlineColor="transparent"
-            onChangeText={text => setEmail(text)}
+            onChangeText={text => setEmail(text.toLowerCase())}
+            value={email}
           />
 
           <TextInput
