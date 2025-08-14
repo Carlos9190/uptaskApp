@@ -41,7 +41,7 @@ export default function Projects() {
 
         <Text style={globalStyles.subtitle}>Select a project</Text>
 
-        <View style={styles.content}>
+        <View style={[styles.content, { marginBottom: 20 }]}>
           {data.getProjects.map(project => (
             <List.Item
               key={project.id}

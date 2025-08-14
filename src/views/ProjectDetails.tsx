@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Text, Button, TextInput } from 'react-native-paper';
 import { StackScreenProps } from '@react-navigation/stack';
 import { useToast } from '../context/ToastContext';
@@ -59,7 +59,34 @@ export default function ProjectDetails({ route }: ProjectDetailsProps) {
   });
 
   // Apollo's mutation
-  const [createTask] = useMutation(NEW_TASK);
+  const [createTask] = useMutation(NEW_TASK, {
+    update(cache, { data: { createTask } }) {
+      if (!data) return;
+
+      const existing = cache.readQuery<GetTasksData>({
+        query: GET_TASKS,
+        variables: {
+          input: {
+            project: route.params.id,
+          },
+        },
+      });
+
+      if (!existing) return;
+
+      const { getTasks } = existing;
+
+      cache.writeQuery<GetTasksData>({
+        query: GET_TASKS,
+        variables: {
+          input: {
+            project: route.params.id,
+          },
+        },
+        data: { getTasks: [...getTasks, createTask] },
+      });
+    },
+  });
 
   const handleSubmit = async () => {
     // Validate
@@ -94,7 +121,9 @@ export default function ProjectDetails({ route }: ProjectDetailsProps) {
   if (loading) return <Spinner />;
 
   return (
-    <View style={[globalStyles.container, { backgroundColor: '#E84347' }]}>
+    <ScrollView
+      style={[globalStyles.container, { backgroundColor: '#E84347' }]}
+    >
       <View style={{ marginHorizontal: '2.5%', marginTop: 20 }}>
         <View>
           <TextInput
@@ -112,12 +141,12 @@ export default function ProjectDetails({ route }: ProjectDetailsProps) {
 
         <Text style={globalStyles.subtitle}>Task: {route.params.name}</Text>
 
-        <View style={{ backgroundColor: '#FFF' }}>
+        <View style={{ backgroundColor: '#FFF', marginBottom: 20 }}>
           {data?.getTasks.map(task => (
             <TaskCard key={task.id} task={task} />
           ))}
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
